@@ -1,0 +1,9 @@
+{
+  "tool_call": "codeql_static_analysis",
+  "description": "使用 CodeQL 对 Python 源码进行静态漏洞分析",
+  "arguments": {
+    "src_path": "Python 源代码路径",
+    "query_path": "QL 查询路径",
+    "output_path": "输出报告文件路径（SARIF 格式）"
+  }
+}
