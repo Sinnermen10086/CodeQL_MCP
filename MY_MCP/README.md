@@ -1,100 +1,116 @@
-# MCP 安全分析系统
+# MCP本地代码安全分析工具
 
-MCP是一个本地大模型驱动的代码安全分析系统，结合了CodeQL静态分析和OSV-Scanner依赖漏洞扫描能力，为开发者提供一站式的代码安全分析服务。
+## 项目概述
+MCP本地代码安全分析工具是一个集成了多种安全分析技术的代码审计系统，能够自动化地对项目进行全面安全分析，发现潜在安全漏洞并提供专业修复建议。
 
-## 功能特点
+## 核心功能
 
-- 🚀 **智能关键词匹配**：自动从用户需求中提取关键词，精准匹配最合适的CodeQL规则
-- 🔍 **多语言支持**：支持Python、Java、JavaScript、C/C++、C#、Go、Ruby等主流语言
-- 🛡️ **漏洞分类全覆盖**：SQL注入、XSS、命令注入、信息泄露、路径遍历等常见漏洞类型
-- 📊 **自然语言报告**：生成易懂的安全分析报告，避免晦涩的技术术语
-- 🧠 **大模型驱动**：本地部署大模型，保证数据隐私与分析效率
+- **多维度安全分析**：集成OSV-Scanner和CodeQL两大静态分析工具
+- **智能查询选择**：根据用户需求和项目语言自动选择最合适的CodeQL查询规则
+- **大模型评估**：利用DeepSeek模型对分析结果进行综合评估和解读
+- **交互式安全咨询**：提供聊天模式，回答安全相关问题
+
+## 工作流程
+
+1. **项目分析**：自动分析项目结构、使用的框架和语言
+2. **依赖扫描**：使用OSV-Scanner检测第三方依赖中的已知漏洞
+3. **代码安全分析**：使用CodeQL进行代码级安全漏洞扫描
+4. **智能规则筛选**：根据用户需求和关键词自动选择最适合的分析规则
+5. **大模型评估**：将分析数据提交给模型生成综合安全报告和修复建议
 
 ## 使用方法
 
-### 通过命令行
+### 命令行模式
+```
+python mcp_local.py --analyze "项目路径"
+```
 
-```bash
-# 基本使用
+### 交互式模式
+```
 python mcp_local.py
 
-# 在交互模式中，输入以下命令进行项目分析
-分析项目 "E:\my_project\py_demo" sql注入
-分析项目 "D:\code\java_demo" 检查XSS
-分析项目 "C:\Projects\csharp_demo" 信息泄露
+> 分析项目 "C:\路径\项目名" sql注入
 ```
 
-### 通过API调用
+## 支持的漏洞类型
 
-```python
-import requests
+- SQL注入
+- XSS跨站脚本
+- 命令注入
+- 路径遍历
+- 信息泄露
+- 反序列化漏洞
+- 文件上传漏洞
+- LDAP注入
+- XXE漏洞
+- 等多种安全风险
 
-# 同步分析
-response = requests.post(
-    "http://localhost:8000/analyze_sync",
-    json={"project_path": "E:\\my_project\\py_demo"}
-)
-print(response.json()["report"])
+## 技术特点
 
-# 上传zip分析
-with open("project.zip", "rb") as f:
-    response = requests.post(
-        "http://localhost:8000/analyze_upload",
-        files={"file": f}
-    )
-print(response.json()["report"])
-```
-
-## 专项漏洞检测指令
-
-系统支持以下常见漏洞类型的专项检测：
-
-* **SQL注入**: `分析项目 "E:\vuln_app" sql注入`
-* **XSS**: `分析项目 "E:\vuln_app" xss`
-* **命令注入**: `分析项目 "E:\vuln_app" 命令注入`
-* **信息泄露**: `分析项目 "E:\vuln_app" 信息泄露`
-* **路径遍历**: `分析项目 "E:\vuln_app" 路径遍历`
-* **SSRF**: `分析项目 "E:\vuln_app" ssrf`
-* **反序列化**: `分析项目 "E:\vuln_app" 反序列化`
-* **XXE**: `分析项目 "E:\vuln_app" xxe`
+- **智能QL路径选择**：通过多层次评分机制选择最适合的分析规则
+- **自动语言检测**：自动识别项目主要编程语言
+- **风险模式识别**：能识别危险API调用和风险代码模式
+- **综合风险评分**：提供1-10分的项目安全风险评分
 
 ## 系统要求
 
-- Windows/Linux/macOS
-- Python 3.8+
-- CodeQL CLI
-- OSV-Scanner (可选)
-- 本地部署的大模型 (可配置路径)
+- Python 3.7+
+- CUDA支持(GPU加速，可选)
+- CodeQL CLI工具
+- OSV-Scanner
+
+## 配置说明
+在mcp_local.py文件开头可配置：
+- MODEL_PATH：本地模型路径
+- CODEQL_PATH：CodeQL可执行文件路径
+- CODEQL_QUERIES：CodeQL规则库路径
+
+### 路径配置详解
+- **MODEL_PATH**：指向DeepSeek模型的本地路径，例如"E:\models\deepseek-coder-33b-instruct"
+- **CODEQL_PATH**：CodeQL CLI工具的安装路径，例如"E:\codeql\codeql.exe"
+- **CODEQL_QUERIES**：CodeQL规则库路径，例如"E:\codeql\codeql-main"
+- **结果输出路径**：默认在项目根目录的results文件夹，可通过修改mcp_local.py中的RESULTS_DIR变量自定义
+- **OSV-Scanner路径**：建议通过全局安装，确保在系统PATH中可访问
+
+> **重要提示**：本项目主要使用绝对路径，以保证项目代码与使用工具的独立性。使用者在部署后，需要修改项目中的各个路径以适配本地环境，同时安装requirements.txt中的依赖。
+
+对于不同操作系统：
+- Windows：使用反斜杠"\"或双反斜杠"\\"作为路径分隔符
+- Linux/MacOS：使用正斜杠"/"作为路径分隔符
 
 ## 项目结构
 
 ```
 MCP/
-├── mcp.py               # 命令行主程序
-├── cli_chat.py          # 聊天模式入口
-├── mcp_api.py           # API服务模块
-├── run_mcp.py           # 统一启动器
-├── requirements.txt     # 依赖库清单
-├── MCP_Tools/           # 工具模块目录
+├── mcp_local.py        # 本地分析主程序
+├── requirements.txt    # 依赖库清单
+├── MCP_Tools/          # 工具模块目录
 │   ├── project_analyzer.py  # 项目分析工具
 │   └── CodeQL/             # CodeQL相关模块
 │       ├── codeql_wrapper.py  # CodeQL调用封装
-│       └── codeql_schema.json # CodeQL参数模式定义
-├── results/             # 分析结果输出目录
-└── temp/                # 临时文件目录（用于API上传分析）
+│       └── query_scanner.py   # CodeQL查询规则扫描器
+└── results/            # 分析结果输出目录
 ```
+
+## 安全报告内容
+
+系统生成的安全报告包含以下内容：
+1. 总体安全评分(1-10分)
+2. 代码安全性分析
+3. 依赖安全性分析
+4. 综合风险评估
+5. 修复建议
+6. 风险控制策略
+7. 监控计划
 
 ## 扩展功能
 
 - 支持更多编程语言
 - 添加更多安全规则
 - 集成其他静态分析工具
-- 实现图形用户界面
-- 完善API文档（Swagger/ReDoc）
 
 ## 注意事项
 
-- 确保CodeQL CLI正确安装并可在路径中访问
+- 确保CodeQL CLI正确安装并可在路径中访问，建议CodeQL扫描数据库直接放在CodeQL目录下例如"E:\codeql\codeql-main"
 - 大型项目分析可能需要较长时间
-- 分析结果仅供参考，建议由安全专家进行最终评估
-- API模式下默认仅监听本地地址(127.0.0.1)，如需远程访问请修改host参数 
+- 分析结果仅供参考，建议由安全专家进行最终评估 
